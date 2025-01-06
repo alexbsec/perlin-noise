@@ -1,8 +1,13 @@
+#include "include/perlin.hpp"
+#include "include/tiles.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <cassert>
 #include <cmath>
 #include <cstdlib>
-#include "include/perlin.hpp"
+#include <iostream>
+
+void Draw(sf::RenderWindow &window, textures::TextureBlock texture) {}
 
 int main() {
   const int WINDOW_WIDTH = 1920;
@@ -53,7 +58,23 @@ int main() {
   }
 
   int iterations = 5;
-  ApplyCellularAutomata(pixels, GRID_WIDTH, GRID_HEIGHT, iterations);
+  std::map<int, textures::TextureBlock *> textureMap =
+      ApplyCellularAutomata(pixels, GRID_WIDTH, GRID_HEIGHT, iterations);
+
+  assert(textureMap.size() == GRID_WIDTH * GRID_HEIGHT);
+  assert(textureMap[0]->type == textures::Type::Wall || textures::Type::Ground);
+  
+  int walls = 0, grounds = 0, nulls = 0;
+  for (const auto &pair : textureMap) {
+    if (pair.second->type == textures::Type::Null) nulls++;
+    if (pair.second->type == textures::Type::Ground) grounds++;
+    if (pair.second->type == textures::Type::Wall) walls++;
+  }
+
+
+  std::cout << "Walls: " << walls << std::endl;
+  std::cout << "Grounds: " << grounds << std::endl;
+  std::cout << "Nulls: " << nulls << std::endl;
 
   sf::Texture texture;
   sf::Sprite sprite;
@@ -66,17 +87,16 @@ int main() {
 
   while (window.isOpen()) {
     sf::Event event;
-  
+
     while (window.pollEvent(event)) {
       if (event.type == sf::Event::Closed) {
         window.close();
       }
     }
-    
+
     window.clear();
     window.draw(sprite);
     window.display();
-
   }
 
   delete[] pixels;

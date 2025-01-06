@@ -1,7 +1,10 @@
 #include "include/perlin.hpp"
+#include "include/tiles.hpp"
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <map>
+#include <vector>
 
 float DotProduct(sf::Vector2f vec1, sf::Vector2f vec2) {
   return vec1.x * vec2.x + vec1.y * vec2.y;
@@ -79,15 +82,21 @@ bool IsWithinMapBounds(int x, int y, int width, int height) {
   return x >= 0 && x < width && y >= 0 && y < height;
 }
 
-void ApplyCellularAutomata(sf::Uint8 *grid, int width, int height, int count) {
+std::map<int, textures::TextureBlock *>
+ApplyCellularAutomata(sf::Uint8 *grid, int width, int height, int count) {
   const float midPoint = -0.7f;
   const int midColor = (int)(((midPoint + 1.0f) * 0.5f) * 255);
+  std::map<int, textures::TextureBlock *> blocks;
+  int iteration = 0;
   for (int i = 0; i < count; i++) {
     sf::Uint8 *tmpGrid = new sf::Uint8[width * height * 4];
     std::memcpy(tmpGrid, grid, width * height * 4);
+    std::map<int, textures::TextureBlock *> currBlocks;
     for (int j = 0; j < height; j++) {
       for (int k = 0; k < width; k++) {
         int neighborWallCount = 0;
+        textures::TextureBlock *block = new textures::TextureBlock(k, j);
+        std::vector<textures::TextureBlock *> adjacentBlocks;
         for (int y = j - 1; y <= j + 1; y++) {
           for (int x = k - 1; x <= k + 1; x++) {
             if (!IsWithinMapBounds(x, y, width, height)) {
@@ -95,31 +104,67 @@ void ApplyCellularAutomata(sf::Uint8 *grid, int width, int height, int count) {
               continue;
             }
 
-            if (y == j && x == k)
+            if (y == j && x == k) {
+              // neighbor is self
               continue;
+            }
 
             int index = (y * width + x) * 4;
-            if (tmpGrid[index] >= midColor) {
-              neighborWallCount++;
+            textures::TextureBlock *adjBlock;
+            if (currBlocks.find(index) != currBlocks.end()) {
+              // adjacent block already exists in the map
+              adjBlock = currBlocks.at(index);
+            } else {
+              adjBlock = new textures::TextureBlock(x, y);
+              adjBlock->index = index;
+              currBlocks[index] = adjBlock;
             }
+
+            if (tmpGrid[index] >= midColor) {
+              adjBlock->type = textures::Type::Wall;
+              neighborWallCount++;
+            } else {
+              adjBlock->type = textures::Type::Ground;
+            }
+
+            adjacentBlocks.push_back(adjBlock);
           }
         }
 
         int jkIndex = (j * width + k) * 4;
+        block->index = jkIndex;
         if (neighborWallCount > 4) {
+          // Floor
+          block->type = textures::Type::Ground;
           grid[jkIndex] = tmpGrid[jkIndex];
           grid[jkIndex + 1] = tmpGrid[jkIndex + 1];
           grid[jkIndex + 2] = tmpGrid[jkIndex + 2];
           grid[jkIndex + 3] = tmpGrid[jkIndex + 3];
         } else {
+          // Wall
+          block->type = textures::Type::Wall;
           grid[jkIndex] = 0;
           grid[jkIndex + 1] = 0;
           grid[jkIndex + 2] = 0;
           grid[jkIndex + 3] = 255;
         }
+
+        currBlocks[jkIndex] = block;
       }
+    }
+
+    iteration++;
+    if (iteration == count) {
+      blocks = currBlocks;
+    } else {
+      for (auto &pair : currBlocks) {
+        delete pair.second;
+      }
+      currBlocks.clear();
     }
 
     delete[] tmpGrid;
   }
+
+  return blocks;
 }

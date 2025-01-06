@@ -1,7 +1,9 @@
 #ifndef _PERLIN_NOISE_PERLIN_HPP
 #define _PERLIN_NOISE_PERLIN_HPP
 
+#include "tiles.hpp"
 #include <SFML/Graphics.hpp>
+#include <map>
 
 float DotProduct(sf::Vector2f vec1, sf::Vector2f vec2);
 
@@ -15,6 +17,7 @@ float SamplePerlin(float x, float y);
 
 bool IsWithinMapBounds(int x, int y, int width, int height);
 
-void ApplyCellularAutomata(sf::Uint8 *grid, int width, int height, int count);
+std::map<int, textures::TextureBlock *>
+ApplyCellularAutomata(sf::Uint8 *grid, int width, int height, int count);
 
 #endif
