@@ -121,10 +121,7 @@ ApplyCellularAutomata(sf::Uint8 *grid, int width, int height, int count) {
             }
 
             if (tmpGrid[index] >= midColor) {
-              adjBlock->type = textures::Type::Wall;
               neighborWallCount++;
-            } else {
-              adjBlock->type = textures::Type::Ground;
             }
 
             adjacentBlocks.push_back(adjBlock);
