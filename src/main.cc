@@ -7,19 +7,26 @@
 #include <cstdlib>
 #include <iostream>
 
-void Draw(sf::RenderWindow &window, textures::TextureBlock texture) {}
+const int WINDOW_WIDTH = 1920;
+const int WINDOW_HEIGHT = 1080;
+const int PIXEL_SIZE = 16;
+const int GRID_WIDTH = WINDOW_WIDTH / PIXEL_SIZE;
+const int GRID_HEIGHT = WINDOW_HEIGHT / PIXEL_SIZE;
+
+void DrawMap(sf::RenderWindow &window,
+             const std::map<int, textures::TextureBlock *> &map) {
+  for (const auto& pair : map) {
+    textures::TextureBlock *block = pair.second;
+    block->SetSpritePosition(block->x * PIXEL_SIZE, block->y * PIXEL_SIZE);
+    window.draw(block->sprite);
+  }
+}
 
 int main() {
-  const int WINDOW_WIDTH = 1920;
-  const int WINDOW_HEIGHT = 1080;
 
   sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT, 32),
                           "Perlin Noise");
 
-  const int PIXEL_SIZE = 16;
-
-  const int GRID_WIDTH = WINDOW_WIDTH / PIXEL_SIZE;
-  const int GRID_HEIGHT = WINDOW_HEIGHT / PIXEL_SIZE;
 
   sf::Uint8 *pixels = new sf::Uint8[GRID_WIDTH * GRID_HEIGHT * 4];
 
@@ -63,27 +70,29 @@ int main() {
 
   assert(textureMap.size() == GRID_WIDTH * GRID_HEIGHT);
   assert(textureMap[0]->type == textures::Type::Wall || textures::Type::Ground);
-  
+
   int walls = 0, grounds = 0, nulls = 0;
   for (const auto &pair : textureMap) {
-    if (pair.second->type == textures::Type::Null) nulls++;
-    if (pair.second->type == textures::Type::Ground) grounds++;
-    if (pair.second->type == textures::Type::Wall) walls++;
+    if (pair.second->type == textures::Type::Null)
+      nulls++;
+    if (pair.second->type == textures::Type::Ground)
+      grounds++;
+    if (pair.second->type == textures::Type::Wall)
+      walls++;
   }
-
 
   std::cout << "Walls: " << walls << std::endl;
   std::cout << "Grounds: " << grounds << std::endl;
   std::cout << "Nulls: " << nulls << std::endl;
 
-  sf::Texture texture;
-  sf::Sprite sprite;
-  texture.create(GRID_WIDTH, GRID_HEIGHT);
+  //sf::Texture texture;
+  //sf::Sprite sprite;
+  //texture.create(GRID_WIDTH, GRID_HEIGHT);
 
-  texture.update(pixels);
+  //texture.update(pixels);
 
-  sprite.setTexture(texture);
-  sprite.setScale(PIXEL_SIZE, PIXEL_SIZE);
+  //sprite.setTexture(texture);
+  //sprite.setScale(PIXEL_SIZE, PIXEL_SIZE);
 
   while (window.isOpen()) {
     sf::Event event;
@@ -95,7 +104,7 @@ int main() {
     }
 
     window.clear();
-    window.draw(sprite);
+    DrawMap(window, textureMap);
     window.display();
   }
 

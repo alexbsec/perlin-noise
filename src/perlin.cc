@@ -133,6 +133,7 @@ ApplyCellularAutomata(sf::Uint8 *grid, int width, int height, int count) {
         if (neighborWallCount > 4) {
           // Floor
           block->type = textures::Type::Ground;
+          block->LoadTexture(FLOOR_PATH);
           grid[jkIndex] = tmpGrid[jkIndex];
           grid[jkIndex + 1] = tmpGrid[jkIndex + 1];
           grid[jkIndex + 2] = tmpGrid[jkIndex + 2];
@@ -140,6 +141,7 @@ ApplyCellularAutomata(sf::Uint8 *grid, int width, int height, int count) {
         } else {
           // Wall
           block->type = textures::Type::Wall;
+          block->LoadTexture(WALL_PATH);
           grid[jkIndex] = 0;
           grid[jkIndex + 1] = 0;
           grid[jkIndex + 2] = 0;
