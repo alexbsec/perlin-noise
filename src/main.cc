@@ -85,14 +85,14 @@ int main() {
   std::cout << "Grounds: " << grounds << std::endl;
   std::cout << "Nulls: " << nulls << std::endl;
 
-  //sf::Texture texture;
-  //sf::Sprite sprite;
-  //texture.create(GRID_WIDTH, GRID_HEIGHT);
+  sf::Texture texture;
+  sf::Sprite sprite;
+  texture.create(GRID_WIDTH, GRID_HEIGHT);
 
-  //texture.update(pixels);
+  texture.update(pixels);
 
-  //sprite.setTexture(texture);
-  //sprite.setScale(PIXEL_SIZE, PIXEL_SIZE);
+  sprite.setTexture(texture);
+  sprite.setScale(PIXEL_SIZE, PIXEL_SIZE);
 
   while (window.isOpen()) {
     sf::Event event;
